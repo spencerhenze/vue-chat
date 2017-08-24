@@ -7,7 +7,14 @@ const state = {
 	joined: false,
 	name: '',
 	messages: [],
-	room:''
+	room:'',
+	rooms: [
+		// hard-coded chat room objects
+		{value: 'superchat', text: 'SuperChat'},
+		{value: 'BCW', text: 'Boise Codeworks'},
+		{value: 'general', text: 'General'},
+		{value: 'dinosaurs', text: 'Dinosaurs'},
+	]
 };
 
 const mutations = {
@@ -23,6 +30,9 @@ const mutations = {
 	
 	clearMessages(state){
 		state.messages =[];
+	},
+	addChatRoom(state, payload) {
+		state.rooms.push(payload)
 	}
  
 };
@@ -40,6 +50,12 @@ const actions = {
 
 	clearMessages({commit,state}){
 		commit('clearMessages');
+	},
+	addChatRoom({commit, state}, payload) {
+		// check for the values before commiting the change
+		if(payload.value && payload.text){
+			commit('addChatRoom', payload);
+		}
 	}
 
 
@@ -48,6 +64,9 @@ const actions = {
 const getters = {
 	messages: (state) => {
 		return state.messages;
+	},
+	rooms: (state) => {
+		return state.rooms
 	}
 };
 

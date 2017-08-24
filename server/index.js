@@ -39,6 +39,12 @@ io.on('connection', function (socket) {//socket - who connected(client)
 		}
 	});
 
+	socket.on('roomAdded', function (roomName) {
+		if (roomName){
+			io.emit('roomAdded', {value: roomName.toLowerCase(), text: roomName})
+		}
+	})
+
 	socket.on('image', function (image) {//when an image comes in, emit message object
 		if (image) {
 			io.to(socket.room).emit('message', { user: socket.user, message: false, imageurl: image, linkurl: false });

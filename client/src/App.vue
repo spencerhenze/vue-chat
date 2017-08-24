@@ -1,17 +1,39 @@
 <template>
 	<div>
+		<!--renders before join  -->
 		<div v-if="!joined" class="text-center">
-			<form @submit.prevent="join">
-
-				<input type="radio" name="chatroom" value="BCW" v-model="room" checked>BCW<br>
-				<input type="radio" name="chatroom" value="general" v-model="room">General<br>
-				<input type="radio" name="chatroom" value="dinosaurs" v-model="room">Dinosaurs<br>
-				<div class="form-group">
-					<input type="text" max="12" class="form-control input-lg text-center" placeholder="Name" v-model="name">
-				</div>
-				<button class="btn btn-primary btn-lg join" type="submit">Join Chat</button>
-			</form>
+			<div class="welcome-header">
+				<h1>Welcome to MasterChat!</h1>
+				<h3>Select a chat room and enter your name</h3>
+			</div>
+			<div class="join-block">
+				<form @submit.prevent="join">
+					<select v-model="room">
+						<option selected disabled value="">Choose here</option>
+						<option v-for="room in rooms">{{room.text}}</option>
+						<!-- <option value="BCW">BCW</option>
+						<option value="general">General</option>
+						<option value="dinosaurs">Dinosaurs</option> -->
+					</select>
+					<div>
+						<h3>OR</h3>
+						<form @submit.prevent="addChatRoom">
+							<div class="form-group">
+								<input type="text" placeholder="new chat room name" v-model="newRoomName">
+								<button type="submit" class="btn btn-primary">Add</button>
+							</div>
+						</form>
+					</div>
+					<!--Name entry  -->
+					<div class="form-group">
+						<input type="text" max="12" class="form-control input-lg text-center" placeholder="Name" v-model="name">
+					</div>
+					<button class="btn btn-primary btn-lg join" type="submit">Join Chat</button>
+				</form>
+			</div>
 		</div>
+
+		<!--renders after join  -->
 		<div v-if="joined">
 			<div>
 				<h1> {{ room }} </h1>
@@ -41,17 +63,17 @@
 			</div>
 
 
+			<textarea rows="10" type="text" max="12" class=" red input-lg text-center" placeholder="message" v-model="message"></textarea>
+			<button class="btn btn-primary btn-lg" type="button" @click="send">Send Message</button><br>
+
+			<input type="text" max="12" class="form-control input-lg text-center" placeholder="Image Url" v-model="imageurl">
+			<button class="btn btn-primary btn-lg" type="button" @click="sendPic">Post Picture</button>
+
+			<input type="text" max="12" class="form-control input-lg text-center" placeholder="Link Url" v-model="linkurl">
+			<button class="btn btn-primary btn-lg" type="button" @click="sendLink">Post Link</button>
 		</div>
 
 
-		<textarea rows="10" type="text" max="12" class=" red input-lg text-center" placeholder="message" v-model="message"></textarea>
-		<button class="btn btn-primary btn-lg" type="button" @click="send">Send Message</button><br>
-
-		<input type="text" max="12" class="form-control input-lg text-center" placeholder="Image Url" v-model="imageurl">
-		<button class="btn btn-primary btn-lg" type="button" @click="sendPic">Post Picture</button>
-
-		<input type="text" max="12" class="form-control input-lg text-center" placeholder="Link Url" v-model="linkurl">
-		<button class="btn btn-primary btn-lg" type="button" @click="sendLink">Post Link</button>
 
 
 		<!-- <img src="https://puxccbo05z-flywheel.netdna-ssl.com/wp-content/uploads/2015/02/black-mamba-1.jpg"> -->
@@ -71,7 +93,8 @@
 				message: '',
 				room: '',
 				imageurl: '',
-				linkurl: ''
+				linkurl: '',
+				newRoomName: '',
 			}
 		},
 		computed: mapState({
@@ -80,7 +103,11 @@
 			},
 			messages(state) {
 				return state.messages;
+			},
+			rooms(state) {
+				return state.rooms;
 			}
+
 		}),
 		methods: {
 			join: function () {
@@ -112,6 +139,13 @@
 					this.$socket.emit('link', this.linkurl);
 					this.linkurl = '';
 				}
+			},
+			addChatRoom: function () {
+				if (this.newRoomName != '') {
+					// send the new room name to the server so it can construct an object and send it back to go in the store
+					this.$socket.emit('roomAdded', this.newRoomName);
+					this.newRoomName = '';
+				}
 			}
 
 		},
@@ -128,6 +162,10 @@
 			message: function (data) {
 				console.log(data);
 				this.$store.dispatch('addMessage', data);
+			},
+			roomAdded: function (newRoomObj) {
+				this.$store.dispatch('addChatRoom', newRoomObj)
+				alert(`Chatroom: "${newRoomObj.text}" added successfully!\n\nYou can now select it from the dropdown menu.`)
 			}
 		}
 	}
@@ -161,6 +199,11 @@
 
 	a {
 		color: #42b983;
+	}
+
+	.chatroom-buttons {
+		display: flex;
+		align-items: space-around;
 	}
 
 	.chat {
